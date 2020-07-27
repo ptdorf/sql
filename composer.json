@@ -1,0 +1,22 @@
+{
+    "name": "m/sql",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Peter Wilmersdorf",
+            "email": "ptdorf@gmail.com"
+        }
+    ],
+    "require-dev": {
+        "satooshi/php-coveralls"        : "^1.0",
+        "phpunit/phpunit"               : "^9"
+    },
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    }
+}

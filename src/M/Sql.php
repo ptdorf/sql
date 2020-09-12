@@ -1,18 +1,47 @@
 <?php
 namespace M;
 
-use RuntimeException;
-
 
 class Sql
 {
     private $connection = null;
+    private $config = [
+        "host"     => "localhost",
+        "username" => "",
+        "password" => "",
+        "database" => "test",
+    ];
 
-    public function connect($host, $username = null, $password = null, $database = null)
+    public function __construct($host, $username = null, $password = null, $database = null)
     {
-        $this->connection = mysqli_connect($host, $username, $password, $database);
+        if (is_array($host)) {
+            $config = $host;
+
+        } elseif (strpos($host, "mysql://") === 0) {
+            $parts = parse_url($host);
+            $config["host"] = $parts["host"];
+            $config["username"] = $parts["user"];
+            $config["password"] = $parts["pass"];
+            $config["database"] = trim($parts["path"], "/");
+
+        } else {
+            $config["host"] = $host;
+            $config["username"] = $username;
+            $config["password"] = $password;
+            $config["database"] = $database;
+        }
+
+        $this->config = $config + $this->config;
+
+        $this->connection = mysqli_connect(
+            $this->config["host"],
+            $this->config["username"],
+            $this->config["password"],
+            $this->config["database"]
+        );
+
         if (!$this->connection) {
-            throw new RuntimeException("Failed to connect");
+            throw new \RuntimeException("Failed to connect to " . $this->config["host"]);
         }
     }
 
@@ -20,7 +49,7 @@ class Sql
     {
         $res = mysqli_query($this->connection, $sql);
         if ($res === false) {
-            throw new RuntimeException(sprintf(
+            throw new \RuntimeException(sprintf(
                 "Failed to query (%s): %s",
                 $sql,
                 mysqli_error($this->connection)
@@ -34,7 +63,7 @@ class Sql
     {
         $res = mysqli_query($this->connection, $sql);
         if ($res === false) {
-            throw new RuntimeException(sprintf(
+            throw new \RuntimeException(sprintf(
                 "Failed to query (%s): %s",
                 $sql,
                 mysqli_error($this->connection)

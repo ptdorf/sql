@@ -1,5 +1,5 @@
 <?php
-namespace M;
+use M\Sql;
 
 use PHPUnit\Framework\TestCase;
 
@@ -7,39 +7,71 @@ use PHPUnit\Framework\TestCase;
 final class SqlTest extends TestCase
 {
 
-    protected static $db = null;
-    protected static $tempDB = null;
+    protected static $mysql = null;
+    protected static $table = null;
 
     public static function setUpBeforeClass(): void
     {
-        self::$tempDB = "test_" . date("Y_m_d_His");
-        self::$db = new Sql();
-        self::$db->connect("localhost", "root", "", "");
-        self::$db->write("DROP DATABASE IF EXISTS " . self::$tempDB);
-        self::$db->write("CREATE DATABASE " . self::$tempDB);
+        self::$table = "test_" . date("Y_m_d_His");
+        self::$mysql = new Sql(getenv("TEST_DB"));
     }
 
-    public static function teardownAfterClass(): void
+    public static function tearDownAfterClass(): void
     {
-        self::$db->write("DROP DATABASE IF EXISTS " . self::$tempDB);
+        $returned = self::$mysql->write("DROP TABLE " . self::$table);
     }
 
-    public function testInstanceOf(): void
+    public function testInstanceOf()
     {
-        $this->assertInstanceOf("M\Sql", self::$db);
+        $this->assertInstanceOf("M\Sql", self::$mysql);
     }
 
-    public function testRead(): void
+    public function testReadDatabases()
     {
-        $expected = [["Database (mysql)" => "mysql"]];
-        $returned = self::$db->read("SHOW DATABASES LIKE 'mysql'");
+        $expected = 0;
+        $returned = self::$mysql->read("SHOW DATABASES");
+        $this->assertGreaterThan($expected, $returned);
+    }
+
+    public function testCreateTable()
+    {
+        $expected = 0;
+        $returned = self::$mysql->write("CREATE TABLE " . self::$table . " (id INT)");
         $this->assertEquals($expected, $returned);
     }
 
-    public function testWriteTempTable()
+    public function testInsert()
+    {
+        $expected = 1;
+        $returned = self::$mysql->write("INSERT INTO " . self::$table . " VALUES (1)");
+        $this->assertEquals($expected, $returned);
+    }
+
+    public function testSelect()
+    {
+        $expected = 1;
+        $returned = self::$mysql->read("SELECT * FROM " . self::$table);
+        $this->assertEquals($expected, count($returned));
+    }
+
+    public function testDelete()
+    {
+        $expected = 1;
+        $returned = self::$mysql->write("DELETE FROM " . self::$table);
+        $this->assertEquals($expected, $returned);
+    }
+
+    public function testCheck()
     {
         $expected = 0;
-        $returned = self::$db->write("CREATE TABLE " . self::$tempDB . ".tempTable (id INT UNSIGNED NOT NULL PRIMARY KEY)");
+        $returned = self::$mysql->read("SELECT * FROM " . self::$table);
+        $this->assertEquals($expected, count($returned));
+    }
+
+    public function testReadTables()
+    {
+        $expected = 1;
+        $returned = count(self::$mysql->read("SHOW TABLES"));
         $this->assertEquals($expected, $returned);
     }
 

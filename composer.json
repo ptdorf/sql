@@ -2,6 +2,7 @@
     "name": "m/sql",
     "type": "library",
     "version": "0.1.1",
+    "description": "The smallest DB library.",
     "license": "MIT",
     "authors": [
         {

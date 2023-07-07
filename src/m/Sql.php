@@ -7,9 +7,9 @@ class Sql
     private $connection = null;
     private $config = [
         "host"     => "localhost",
-        "username" => "",
-        "password" => "",
-        "database" => "test",
+        "username" => "my",
+        "password" => "secret",
+        "database" => "code",
     ];
 
     public function __construct($host, $username = null, $password = null, $database = null)
